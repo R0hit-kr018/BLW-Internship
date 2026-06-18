@@ -1,9 +1,8 @@
 import axios from 'axios';
 
-const API = axios.create({
-  baseURL: ' https://railguard-ml-api.onrender.com', 
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 15000,
-});;
+});
 
 // Request interceptor - add token
 API.interceptors.request.use((config) => {

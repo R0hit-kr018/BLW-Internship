@@ -1,5 +1,5 @@
 require('dotenv').config();
-require('./config/mockMongoose');
+// require('./config/mockMongoose');
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
