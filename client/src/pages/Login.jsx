@@ -4,11 +4,13 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { login as loginAPI } from '../services/api.js';
 import { Train, Mail, Lock, ArrowRight, Shield, Wrench, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import TrainTransition from '../components/TrainTransition.jsx'; // 🚂 Import the transition component
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false); // 🚂 Track the successful login animation state
   const { loginUser } = useAuth();
   const navigate = useNavigate();
 
@@ -17,22 +19,33 @@ export default function Login() {
     if (!email || !password) return toast.error('Please fill in all fields');
     setLoading(true);
     try {
+      // 1. Hit your MERN backend API first to check credentials
       const { data } = await loginAPI({ email, password });
-      loginUser(data);
-      toast.success(`Welcome back, ${data.name}!`);
-      navigate('/dashboard');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
-    } finally {
+      
+      // 2. Clear loading state and immediately play the train animation because login succeeded!
       setLoading(false);
+      setIsTransitioning(true);
+
+      // 3. Wait 4 seconds for the train to drive off-screen before committing layout changes
+      setTimeout(() => {
+        loginUser(data);
+        setIsTransitioning(false);
+        toast.success(`Welcome back, ${data.name}!`);
+        navigate('/dashboard');
+      }, 4000); // Matches your 4.0s slower train duration configuration
+
+    } catch (err) {
+      // If the API call fails, the train animation NEVER triggers
+      setLoading(false);
+      toast.error(err.response?.data?.message || 'Login failed');
     }
   };
 
   const quickLogin = async (role) => {
     const creds = {
-      admin: { email: 'admin@railguard.in', password: 'admin123' },
-      engineer: { email: 'engineer@railguard.in', password: 'engineer123' },
-      technician: { email: 'tech1@railguard.in', password: 'tech123' },
+      admin: { email: 'rkadmin@railguard.in', password: 'rkadmin123' },
+      engineer: { email: 'rkengineer@railguard.in', password: 'rkengineer123' },
+      technician: { email: 'rktech1@railguard.in', password: 'rktech123' },
     };
     setEmail(creds[role].email);
     setPassword(creds[role].password);
@@ -40,6 +53,10 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex bg-[#0f172a] relative overflow-hidden">
+      
+      {/* 🚂 TRAIN OVERLAY: Only displays on 100% successful authentication response */}
+      {isTransitioning && <TrainTransition direction="login" />}
+
       {/* Animated background grid */}
       <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(245,158,11,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,0.3) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
 
@@ -49,8 +66,8 @@ export default function Login() {
       <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-orange-500/5 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '2s' }} />
 
       {/* Left panel - branding */}
-      <div className="hidden lg:flex flex-1 flex-col justify-center items-center p-12 relative">
-        <div className="max-w-md text-center animate-fade-in">
+      <div className="hidden lg:flex flex-[2] flex-col justify-center items-center p-12 relative">
+        <div className="max-w-2xl text-center animate-fade-in">
           <div className="w-24 h-24 mx-auto mb-8 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-amber-500/20 animate-pulse-glow">
             <Train className="w-12 h-12 text-slate-900" />
           </div>
@@ -77,8 +94,8 @@ export default function Login() {
       </div>
 
       {/* Right panel - login form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md animate-fade-in">
+      <div className="flex-[3] flex items-center justify-center p-8 lg:p-20">
+        <div className="w-full max-w-2xl animate-fade-in">
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
               <Train className="w-6 h-6 text-slate-900" />

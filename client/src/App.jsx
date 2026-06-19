@@ -9,6 +9,7 @@ import Maintenance from './pages/Maintenance.jsx';
 import Alerts from './pages/Alerts.jsx';
 import Reports from './pages/Reports.jsx';
 import Users from './pages/Users.jsx';
+import TrainTransition from './components/TrainTransition.jsx'; // 🚂 Import the transition component
 
 const ProtectedRoute = ({ children, roles }) => {
   const { user, loading } = useAuth();
@@ -19,13 +20,20 @@ const ProtectedRoute = ({ children, roles }) => {
 };
 
 export default function App() {
+  // 🚂 Extract animationState from your updated context hook
+  const { animationState } = useAuth();
+
   return (
     <>
+      {/* 🚂 Global Overlay: Mounts over the screen whenever log in or log out is executing */}
+      {animationState && <TrainTransition direction={animationState} />}
+
       <Toaster position="top-right" toastOptions={{
         style: { background: '#1e293b', color: '#e2e8f0', border: '1px solid rgba(71,85,105,0.3)', borderRadius: '12px' },
         success: { iconTheme: { primary: '#10b981', secondary: '#0f172a' } },
         error: { iconTheme: { primary: '#ef4444', secondary: '#0f172a' } },
       }} />
+
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>

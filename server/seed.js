@@ -19,10 +19,10 @@ const seedData = async () => {
 
     // Create Users
     console.log('👤 Creating users...');
-    const admin = await User.create({ name: 'Rajesh Kumar', email: 'admin@railguard.in', password: 'admin123', role: 'admin', department: 'Management', phone: '9876543210' });
-    const engineer = await User.create({ name: 'Priya Sharma', email: 'engineer@railguard.in', password: 'engineer123', role: 'engineer', department: 'Mechanical', phone: '9876543211' });
-    const tech1 = await User.create({ name: 'Amit Singh', email: 'tech1@railguard.in', password: 'tech123', role: 'technician', department: 'Electrical', phone: '9876543212' });
-    const tech2 = await User.create({ name: 'Vikram Patel', email: 'tech2@railguard.in', password: 'tech123', role: 'technician', department: 'Mechanical', phone: '9876543213' });
+    const admin = await User.create({ name: 'Rajesh Kumar', email: 'rkadmin@railguard.in', password: 'rkadmin123', role: 'admin', department: 'Management', phone: '9876543210' });
+    const engineer = await User.create({ name: 'Priya Sharma', email: 'rkengineer@railguard.in', password: 'rkengineer123', role: 'engineer', department: 'Mechanical', phone: '9876543211' });
+    const tech1 = await User.create({ name: 'Amit Singh', email: 'rktech1@railguard.in', password: 'rktech123', role: 'technician', department: 'Electrical', phone: '9876543212' });
+    const tech2 = await User.create({ name: 'Vikram Patel', email: 'rktech2@railguard.in', password: 'rktech123', role: 'technician', department: 'Mechanical', phone: '9876543213' });
 
     // Create Equipment
     console.log('🔧 Creating equipment...');
@@ -66,10 +66,10 @@ const seedData = async () => {
 
     console.log('\n✅ Seed data created successfully!');
     console.log('📧 Login credentials:');
-    console.log('   Admin:      admin@railguard.in / admin123');
-    console.log('   Engineer:   engineer@railguard.in / engineer123');
-    console.log('   Technician: tech1@railguard.in / tech123');
-    console.log('   Technician: tech2@railguard.in / tech123\n');
+    console.log('   Admin:      rkadmin@railguard.in / rkadmin123');
+    console.log('   Engineer:   rkengineer@railguard.in / rkengineer123');
+    console.log('   Technician: rktech1@railguard.in / rktech123');
+    console.log('   Technician: rktech2@railguard.in / rktech123\n');
 
     process.exit(0);
   } catch (error) {
