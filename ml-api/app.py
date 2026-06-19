@@ -26,6 +26,14 @@ def load_model():
         from train_model import train_model
         model, _ = train_model()
 
+@app.route('/', methods=['GET', 'HEAD'])
+def index():
+    return jsonify({
+        'status': 'ok',
+        'message': 'RailGuard ML Prediction API is running',
+        'version': '1.0.0'
+    })
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok', 'model_loaded': model is not None})
