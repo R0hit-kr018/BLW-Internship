@@ -26,7 +26,7 @@ export default function Navbar({ sidebarOpen, setSidebarOpen }) {
             placeholder="Search equipment, records..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="rail-input pl-10 w-64 bg-slate-800/50 !rounded-xl"
+            className="rail-input !pl-10 w-64 bg-slate-800/50 !rounded-xl"
           />
         </div>
       </div>

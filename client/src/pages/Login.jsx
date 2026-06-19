@@ -95,7 +95,7 @@ export default function Login() {
                 <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="rail-input pl-10" placeholder="admin@railguard.in" />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="rail-input !pl-10" placeholder="admin@railguard.in" />
                 </div>
               </div>
 
@@ -103,7 +103,7 @@ export default function Login() {
                 <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="rail-input pl-10" placeholder="••••••••" />
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="rail-input !pl-10" placeholder="••••••••" />
                 </div>
               </div>
 

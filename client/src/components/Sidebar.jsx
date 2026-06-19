@@ -18,12 +18,12 @@ export default function Sidebar({ open, setOpen }) {
     <aside className={`fixed lg:relative left-0 top-0 h-full lg:h-screen z-40 lg:z-0 transition-all duration-300 bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] border-r border-slate-700/50 ${open ? 'translate-x-0 w-64 lg:w-64' : '-translate-x-full lg:translate-x-0 lg:w-20'}`}>
       {/* Logo */}
       <div className="flex items-center h-16 px-4 border-b border-slate-700/50">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full justify-center">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0">
             <Train className="w-5 h-5 text-slate-900" />
           </div>
           {open && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in flex-1">
               <h1 className="text-lg font-bold bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">RailGuard</h1>
               <p className="text-[10px] text-slate-500 font-medium tracking-wider uppercase">AI Maintenance</p>
             </div>
@@ -56,12 +56,12 @@ export default function Sidebar({ open, setOpen }) {
           ))}
       </nav>
 
-      {/* User info */}
-      {open && (
-        <div className="absolute bottom-4 left-3 right-3">
+      {/* User info - Compact avatar when collapsed */}
+      <div className={`absolute bottom-16 left-3 right-3 transition-all duration-300`}>
+        {open ? (
           <div className="glass-card p-3 !rounded-xl">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-xs font-bold text-slate-900">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-xs font-bold text-slate-900 flex-shrink-0">
                 {user?.name?.charAt(0) || 'U'}
               </div>
               <div className="flex-1 min-w-0">
@@ -73,19 +73,28 @@ export default function Sidebar({ open, setOpen }) {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="flex justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-xs font-bold text-slate-900 shadow-md" title={`${user?.name} (${user?.role})`}>
+              {user?.name?.charAt(0) || 'U'}
+            </div>
+          </div>
+        )}
+      </div>
 
-      {/* Toggle button */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-slate-700 border border-slate-600 hidden lg:flex items-center justify-center hover:bg-amber-500 hover:border-amber-400 transition-colors group z-50"
-      >
-        {open
-          ? <ChevronLeft className="w-3 h-3 text-slate-400 group-hover:text-slate-900" />
-          : <ChevronRight className="w-3 h-3 text-slate-400 group-hover:text-slate-900" />
-        }
-      </button>
+      {/* Bottom toggle button */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center border-t border-slate-700/30 pt-3">
+        <button
+          onClick={() => setOpen(!open)}
+          className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-amber-500 hover:border-amber-400 transition-colors group cursor-pointer"
+          title={open ? "Collapse Sidebar" : "Expand Sidebar"}
+        >
+          {open
+            ? <ChevronLeft className="w-4 h-4 text-slate-400 group-hover:text-slate-900" />
+            : <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-900" />
+          }
+        </button>
+      </div>
     </aside>
   );
 }

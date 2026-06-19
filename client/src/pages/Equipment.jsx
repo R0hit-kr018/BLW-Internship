@@ -113,7 +113,7 @@ export default function Equipment() {
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <input type="text" placeholder="Search equipment..." value={search} onChange={e => setSearch(e.target.value)} className="rail-input pl-10" />
+          <input type="text" placeholder="Search equipment..." value={search} onChange={e => setSearch(e.target.value)} className="rail-input !pl-10" />
         </div>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="rail-input w-auto">
           <option value="">All Status</option>

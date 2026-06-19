@@ -4,12 +4,14 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
 import { Train, Wrench, AlertTriangle, CheckCircle, Activity, TrendingUp, Clock, Users, Zap, ShieldAlert, ThermometerSun, BarChart3 } from 'lucide-react';
 
-const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#64748b', '#3b82f6', '#8b5cf6'];
+const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#64748b'];
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedMaintType, setSelectedMaintType] = useState(null);
+  const [trendRange, setTrendRange] = useState('12 Months');
 
   useEffect(() => {
     fetchStats();
@@ -47,9 +49,52 @@ export default function Dashboard() {
     ? stats.monthlyTrend.map(t => ({ month: t._id, count: t.count, cost: t.cost }))
     : getDemoTrend();
 
+  const getTrendDataForRange = () => {
+    if (trendRange === '7 Days') {
+      return [
+        { month: 'Mon', count: 1, cost: 4000 },
+        { month: 'Tue', count: 3, cost: 12000 },
+        { month: 'Wed', count: 2, cost: 8000 },
+        { month: 'Thu', count: 4, cost: 15000 },
+        { month: 'Fri', count: 1, cost: 5000 },
+        { month: 'Sat', count: 0, cost: 0 },
+        { month: 'Sun', count: 2, cost: 6000 },
+      ];
+    }
+    if (trendRange === '30 Days') {
+      return [
+        { month: 'Week 1', count: 8, cost: 32000 },
+        { month: 'Week 2', count: 5, cost: 20000 },
+        { month: 'Week 3', count: 12, cost: 48000 },
+        { month: 'Week 4', count: 9, cost: 36000 },
+      ];
+    }
+    return trendData;
+  };
+
   const maintenanceTypeData = (stats?.maintenanceTypes || getDemoData().maintenanceTypes).map((m, i) => ({
     name: m._id, value: m.count, color: COLORS[i % COLORS.length],
   }));
+
+  // Filter alerts by selected pie slice category
+  const allAlerts = stats?.recentAlerts || getDemoAlerts();
+  const filteredAlerts = selectedMaintType
+    ? allAlerts.filter(alert => {
+        const msg = (alert.message || '').toLowerCase();
+        const category = (alert.type || '').toLowerCase();
+        const typeLower = selectedMaintType.toLowerCase();
+        if (typeLower === 'predictive') {
+          return category === 'prediction-alert' || msg.includes('ml prediction') || msg.includes('predict');
+        }
+        if (typeLower === 'emergency' || typeLower === 'corrective') {
+          return category === 'critical-failure' || category === 'high-temperature' || msg.includes('failure') || msg.includes('exceeds') || msg.includes('limit');
+        }
+        if (typeLower === 'preventive' || typeLower === 'routine' || typeLower === 'routine-inspection') {
+          return category === 'maintenance-due' || category === 'usage-limit' || msg.includes('overdue') || msg.includes('interval') || msg.includes('due') || msg.includes('inspection') || msg.includes('routine');
+        }
+        return true;
+      })
+    : allAlerts;
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -100,11 +145,28 @@ export default function Dashboard() {
 
         {/* Maintenance Trend */}
         <div className="glass-card p-6 col-span-1 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-amber-400" /> Maintenance Trend (12 Months)
-          </h3>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-amber-400" /> Maintenance Trend
+            </h3>
+            <div className="flex bg-slate-800/80 rounded-lg p-0.5 border border-slate-700/50">
+              {['7 Days', '30 Days', '12 Months'].map(range => (
+                <button
+                  key={range}
+                  onClick={() => setTrendRange(range)}
+                  className={`text-[10px] font-semibold px-2 py-1 rounded-md transition-colors cursor-pointer ${
+                    trendRange === range
+                      ? 'bg-amber-500 text-slate-900 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={trendData}>
+            <AreaChart data={getTrendDataForRange()}>
               <defs>
                 <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
@@ -144,16 +206,40 @@ export default function Dashboard() {
         {/* Maintenance Types */}
         <div className="glass-card p-6">
           <h3 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-amber-400" /> Maintenance Types Distribution
+            <Wrench className="w-4 h-4 text-amber-400" /> Maintenance Types Distribution {selectedMaintType && <span className="text-xs text-amber-400 font-normal ml-1">({selectedMaintType} selected)</span>}
           </h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={maintenanceTypeData} cx="50%" cy="50%" outerRadius={85} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} stroke="none">
-                {maintenanceTypeData.map((entry, i) => (<Cell key={i} fill={entry.color} />))}
+              <Pie
+                data={maintenanceTypeData}
+                cx="50%"
+                cy="50%"
+                outerRadius={85}
+                paddingAngle={3}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                stroke="none"
+                className="cursor-pointer"
+                onClick={(data) => {
+                  if (data && data.name) {
+                    setSelectedMaintType(prev => prev === data.name ? null : data.name);
+                  }
+                }}
+              >
+                {maintenanceTypeData.map((entry, i) => (
+                  <Cell
+                    key={i}
+                    fill={entry.color}
+                    stroke={selectedMaintType === entry.name ? '#ffffff' : 'none'}
+                    strokeWidth={selectedMaintType === entry.name ? 2 : 0}
+                    className="focus:outline-none"
+                  />
+                ))}
               </Pie>
               <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '10px', fontSize: '12px', color: '#e2e8f0' }} />
             </PieChart>
           </ResponsiveContainer>
+          <p className="text-[10px] text-center text-slate-500 mt-1">💡 Click any pie slice to filter Recent Alerts by maintenance category</p>
         </div>
       </div>
 
@@ -187,24 +273,38 @@ export default function Dashboard() {
 
         {/* Recent Alerts */}
         <div className="glass-card p-6">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400" /> Recent Alerts
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400" /> Recent Alerts
+            </h3>
+            {selectedMaintType && (
+              <button
+                onClick={() => setSelectedMaintType(null)}
+                className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer bg-slate-800 px-2 py-0.5 rounded border border-slate-700"
+              >
+                Filtered: {selectedMaintType} (Reset ×)
+              </button>
+            )}
+          </div>
           <div className="space-y-3">
-            {(stats?.recentAlerts || getDemoAlerts()).slice(0, 5).map((alert, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
-                <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${alert.severity === 'critical' ? 'bg-red-400 animate-pulse' : alert.severity === 'warning' ? 'bg-amber-400' : 'bg-blue-400'}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-300 line-clamp-2">{alert.message}</p>
-                  <p className="text-[10px] text-slate-500 mt-1">
-                    {alert.equipment?.equipmentName || 'Equipment'} • {new Date(alert.createdAt || Date.now()).toLocaleDateString()}
-                  </p>
+            {filteredAlerts.length === 0 ? (
+              <div className="text-center py-8 text-slate-500 text-sm">No matching alerts found for this category.</div>
+            ) : (
+              filteredAlerts.slice(0, 5).map((alert, i) => (
+                <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
+                  <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${alert.severity === 'critical' ? 'bg-red-400 animate-pulse' : alert.severity === 'warning' ? 'bg-amber-400' : 'bg-blue-400'}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-300 line-clamp-2">{alert.message}</p>
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      {alert.equipment?.equipmentName || 'Equipment'} • {new Date(alert.createdAt || Date.now()).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full capitalize font-medium ${alert.severity === 'critical' ? 'bg-red-500/15 text-red-400' : alert.severity === 'warning' ? 'bg-amber-500/15 text-amber-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                    {alert.severity}
+                  </span>
                 </div>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full capitalize font-medium ${alert.severity === 'critical' ? 'bg-red-500/15 text-red-400' : alert.severity === 'warning' ? 'bg-amber-500/15 text-amber-400' : 'bg-blue-500/15 text-blue-400'}`}>
-                  {alert.severity}
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -214,15 +314,15 @@ export default function Dashboard() {
 
 function KPICard({ icon: Icon, label, value, trend, color }) {
   const colorMap = {
-    amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
-    emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
-    blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
-    red: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
+    amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30', glow: 'shadow-[0_0_20px_rgba(245,158,11,0.12)]' },
+    emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30', glow: 'shadow-[0_0_20px_rgba(16,185,129,0.12)]' },
+    blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', glow: 'shadow-[0_0_20px_rgba(59,130,246,0.12)]' },
+    red: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30', glow: 'shadow-[0_0_20px_rgba(239,68,68,0.12)]' },
   };
   const c = colorMap[color] || colorMap.amber;
 
   return (
-    <div className={`glass-card p-5 border ${c.border}`}>
+    <div className={`glass-card p-5 border ${c.border} ${c.glow}`}>
       <div className="flex items-center justify-between mb-3">
         <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center`}>
           <Icon className={`w-5 h-5 ${c.text}`} />
